@@ -4,7 +4,6 @@ import {
 
 @Directive({
   selector: '[ngxOverflowReveal]',
-  standalone: true,
 })
 export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private host = inject(ElementRef<HTMLElement>).nativeElement;
