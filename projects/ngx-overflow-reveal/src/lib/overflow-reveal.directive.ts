@@ -17,6 +17,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private onLeaveOff?: () => void;
   private onScrollOff?: () => void;
   private onResizeOff?: () => void;
+  private readonly extraPaddingX = 6; // Extra horizontal padding in pixels for revealed state
+  private readonly extraPaddingY = 4; // Extra vertical padding in pixels for revealed state
 
   ngOnInit(): void {
     this.ro = new ResizeObserver(() => this.detach());
@@ -66,25 +68,31 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     // NEW: infer an opaque background color so the overlay hides original text
     const inferredBg = inferOpaqueBackgroundColor(this.host);
 
+    // Calculate additional padding for revealed state
+    const basePaddingLeft = parseFloat(cs.paddingLeft) || 0;
+    const basePaddingRight = parseFloat(cs.paddingRight) || 0;
+    const basePaddingTop = parseFloat(cs.paddingTop) || 0;
+    const basePaddingBottom = parseFloat(cs.paddingBottom) || 0;
+
     Object.assign(panel.style, {
       position: 'fixed',
-      left: `${rect.left}px`,
-      top: `${rect.top}px`,
+      left: `${rect.left - this.extraPaddingX}px`,
+      top: `${rect.top - this.extraPaddingY}px`,
       minWidth: `${rect.width}px`,
       width: 'max-content',       // expand to fit full text
-      height: `${rect.height}px`,
+      height: `${rect.height + 2 * this.extraPaddingY}px`,
       zIndex: '2147483647',
       pointerEvents: 'none',
-      backgroundColor: inferredBg,     // <- was 'transparent'
+      backgroundColor: inferredBg,
       overflow: 'visible',        // let text continue outside the host width
       whiteSpace: 'nowrap',       // single-line continuation effect
       boxSizing: 'border-box',
 
-      // Mirror typography & padding from host so the text baseline aligns perfectly
-      paddingTop: cs.paddingTop,
-      paddingRight: cs.paddingRight,
-      paddingBottom: cs.paddingBottom,
-      paddingLeft: cs.paddingLeft,
+      // Mirror typography & padding from host, with additional padding for revealed state
+      paddingTop: `${basePaddingTop + this.extraPaddingY}px`,
+      paddingRight: `${basePaddingRight + this.extraPaddingX}px`,
+      paddingBottom: `${basePaddingBottom + this.extraPaddingY}px`,
+      paddingLeft: `${basePaddingLeft + this.extraPaddingX}px`,
 
       fontFamily: cs.fontFamily,
       fontSize: cs.fontSize,
@@ -101,8 +109,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       fontKerning: cs.fontKerning,
       textRendering: cs.textRendering,
 
-      // Shape: keep rounded containers looking right and avoid painting under the border
-      borderRadius: cs.borderRadius,
+      borderRadius: '6px',
       backgroundClip: 'padding-box',
     });
 
@@ -127,10 +134,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     if (!this.panel) return;
     const rect = this.host.getBoundingClientRect();
 
-    this.panel.style.left = `${Math.round(rect.left)}px`;
-    this.panel.style.top = `${Math.round(rect.top)}px`;
+    this.panel.style.left = `${Math.round(rect.left - this.extraPaddingX)}px`;
+    this.panel.style.top = `${Math.round(rect.top - this.extraPaddingY)}px`;
     this.panel.style.minWidth = `${Math.round(rect.width)}px`;
-    this.panel.style.height = `${Math.round(rect.height)}px`;
+    this.panel.style.height = `${Math.round(rect.height + 2 * this.extraPaddingY)}px`;
 
     // Re-adjust position after updates
     this.adjustPanelPosition(this.panel, rect);
@@ -141,14 +148,13 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const panelRect = panel.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
 
-    // Check if panel extends beyond the right edge of the viewport
-    const panelRight = hostRect.left + panelRect.width;
+    const panelRight = hostRect.left - this.extraPaddingX + panelRect.width;
 
     if (panelRight > viewportWidth) {
       // Calculate how much we need to shift left
       const overflow = panelRight - viewportWidth;
       const padding = 8; // Add small padding from viewport edge
-      const newLeft = Math.max(0, hostRect.left - overflow - padding);
+      const newLeft = Math.max(0, hostRect.left - this.extraPaddingX - overflow - padding);
 
       panel.style.left = `${Math.round(newLeft)}px`;
     }
