@@ -14,5 +14,6 @@
   ],
   "exclude": [
     "**/*.spec.ts"
-  ]
+  ],
+  "paths": { "ngx-overflow-reveal": ["projects/ngx-overflow-reveal/src/public-api.ts"] }
 }
