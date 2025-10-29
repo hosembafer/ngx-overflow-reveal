@@ -17,8 +17,21 @@
   </section>
 
   <section class="section">
+    <h2>Elevated Style</h2>
+    <p class="description">Add elevation with shadow to make the revealed text stand out</p>
+    <div class="example-card">
+      <div
+        ngxOverflowReveal
+        [ngxOverflowRevealElevated]="true"
+        class="truncated-text">
+        This text reveals with an elevated shadow effect that distinguishes it from content behind
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
     <h2>Data Table</h2>
-    <p class="description">Table cells with overflowing content</p>
+    <p class="description">Table cells with overflowing content using elevated style</p>
     <div class="table-container">
       <table class="data-table">
         <thead>
@@ -35,6 +48,7 @@
               <td>
                 <div
                   ngxOverflowReveal
+                  [ngxOverflowRevealElevated]="true"
                   class="table-cell-content">
                   {{ product.name }}
                 </div>
@@ -42,6 +56,7 @@
               <td>
                 <div
                   ngxOverflowReveal
+                  [ngxOverflowRevealElevated]="true"
                   class="table-cell-content">
                   {{ product.description }}
                 </div>
@@ -49,6 +64,7 @@
               <td>
                 <div
                   ngxOverflowReveal
+                  [ngxOverflowRevealElevated]="true"
                   class="table-cell-content">
                   {{ product.category }}
                 </div>
@@ -95,11 +111,12 @@
 
   <section class="section">
     <h2>Tags &amp; Pills</h2>
-    <p class="description">Small components with truncated labels</p>
+    <p class="description">Small components with truncated labels and elevation</p>
     <div class="tags-container">
       @for (tag of tags(); track tag.id) {
         <span
           ngxOverflowReveal
+          [ngxOverflowRevealElevated]="true"
           class="tag"
           [style.background]="tag.color">
           {{ tag.name }}

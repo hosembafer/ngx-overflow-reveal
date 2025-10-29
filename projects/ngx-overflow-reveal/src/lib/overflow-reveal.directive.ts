@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, NgZone, OnDestroy, OnInit, Renderer2, inject
+  Directive, ElementRef, NgZone, OnDestroy, OnInit, Renderer2, inject, input
 } from '@angular/core';
 
 @Directive({
@@ -9,6 +9,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private host = inject(ElementRef<HTMLElement>).nativeElement;
   private zone = inject(NgZone);
   private r2 = inject(Renderer2);
+
+  ngxOverflowRevealElevated = input<boolean>(false);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -111,6 +113,11 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
       borderRadius: '6px',
       backgroundClip: 'padding-box',
+
+      // Elevation effect when enabled
+      boxShadow: this.ngxOverflowRevealElevated()
+        ? '0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.05)'
+        : 'none',
     });
 
     // Set vendor-prefixed properties separately (not in standard CSSStyleDeclaration)
