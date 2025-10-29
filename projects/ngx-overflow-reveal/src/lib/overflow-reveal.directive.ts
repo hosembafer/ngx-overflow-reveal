@@ -1,5 +1,5 @@
 import {
-  Directive, ElementRef, Input, NgZone, OnDestroy, OnInit, Renderer2, inject
+  Directive, ElementRef, NgZone, OnDestroy, OnInit, Renderer2, inject
 } from '@angular/core';
 
 @Directive({
@@ -7,9 +7,6 @@ import {
   standalone: true,
 })
 export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
-  /** Optional custom text; defaults to element's textContent */
-  @Input() ngxOverflowRevealText?: string;
-
   private host = inject(ElementRef<HTMLElement>).nativeElement;
   private zone = inject(NgZone);
   private r2 = inject(Renderer2);
@@ -58,7 +55,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private attach() {
     if (this.panel) return;
 
-    const text = (this.ngxOverflowRevealText ?? this.host.textContent ?? '').trim();
+    const text = (this.host.textContent ?? '').trim();
     if (!text) return;
 
     const panel = this.r2.createElement('div') as HTMLDivElement;
@@ -116,6 +113,9 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     panel.textContent = text;
     document.body.appendChild(panel);
+
+    // Adjust position if panel overflows the viewport
+    this.adjustPanelPosition(panel, rect);
   }
 
   private detach() {
@@ -132,6 +132,27 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.panel.style.top = `${Math.round(rect.top)}px`;
     this.panel.style.minWidth = `${Math.round(rect.width)}px`;
     this.panel.style.height = `${Math.round(rect.height)}px`;
+
+    // Re-adjust position after updates
+    this.adjustPanelPosition(this.panel, rect);
+  }
+
+  private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect) {
+    // Get panel's actual width after rendering
+    const panelRect = panel.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+
+    // Check if panel extends beyond the right edge of the viewport
+    const panelRight = hostRect.left + panelRect.width;
+
+    if (panelRight > viewportWidth) {
+      // Calculate how much we need to shift left
+      const overflow = panelRight - viewportWidth;
+      const padding = 8; // Add small padding from viewport edge
+      const newLeft = Math.max(0, hostRect.left - overflow - padding);
+
+      panel.style.left = `${Math.round(newLeft)}px`;
+    }
   }
 }
 
