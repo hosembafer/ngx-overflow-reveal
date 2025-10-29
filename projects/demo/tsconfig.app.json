@@ -4,7 +4,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "types": []
+    "types": [],
+    "paths": {
+      "ngx-overflow-reveal": ["../../projects/ngx-overflow-reveal/src/public-api.ts"]
+    }
   },
   "include": [
     "src/**/*.ts"
