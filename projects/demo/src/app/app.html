@@ -341,8 +341,11 @@
 
 <router-outlet />
 
-<div ngxOverflowReveal style="width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-  Some really really long text that is ellipsed
+<div style="display: flex; background: blue">
+  <div ngxOverflowReveal style="width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; background: red;">
+    Some really really long text that is ellipsed
+  </div>
+  <div>Other text</div>
 </div>
 
 <div ngxOverflowReveal style="margin-left: 90%; width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">

@@ -67,17 +67,21 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const cs = getComputedStyle(this.host);
     const rect = this.host.getBoundingClientRect();
 
+    // NEW: infer an opaque background color so the overlay hides original text
+    const inferredBg = inferOpaqueBackgroundColor(this.host);
+
     Object.assign(panel.style, {
       position: 'fixed',
       left: `${rect.left}px`,
       top: `${rect.top}px`,
-      width: `${rect.width}px`,
+      minWidth: `${rect.width}px`,
+      width: 'max-content',       // expand to fit full text
       height: `${rect.height}px`,
       zIndex: '2147483647',
       pointerEvents: 'none',
-      background: 'transparent',
-      overflow: 'visible',     // key: let the text continue outside the host width
-      whiteSpace: 'nowrap',    // keep on one line for “continuation” effect
+      backgroundColor: inferredBg,     // <- was 'transparent'
+      overflow: 'visible',        // let text continue outside the host width
+      whiteSpace: 'nowrap',       // single-line continuation effect
       boxSizing: 'border-box',
 
       // Mirror typography & padding from host so the text baseline aligns perfectly
@@ -95,7 +99,20 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       color: cs.color,
       textTransform: cs.textTransform,
       textDecoration: cs.textDecoration,
-    } as CSSStyleDeclaration);
+
+      // Font rendering properties to ensure pixel-perfect matching
+      fontVariantNumeric: cs.fontVariantNumeric,
+      fontKerning: cs.fontKerning,
+      textRendering: cs.textRendering,
+
+      // Shape: keep rounded containers looking right and avoid painting under the border
+      borderRadius: cs.borderRadius,
+      backgroundClip: 'padding-box',
+    });
+
+    // Set vendor-prefixed properties separately (not in standard CSSStyleDeclaration)
+    panel.style.setProperty('-webkit-font-smoothing', cs.getPropertyValue('-webkit-font-smoothing'));
+    panel.style.setProperty('-moz-osx-font-smoothing', cs.getPropertyValue('-moz-osx-font-smoothing'));
 
     panel.textContent = text;
     document.body.appendChild(panel);
@@ -113,7 +130,80 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     this.panel.style.left = `${Math.round(rect.left)}px`;
     this.panel.style.top = `${Math.round(rect.top)}px`;
-    this.panel.style.width = `${Math.round(rect.width)}px`;
+    this.panel.style.minWidth = `${Math.round(rect.width)}px`;
     this.panel.style.height = `${Math.round(rect.height)}px`;
   }
 }
+
+/* ---------------- helpers: background inference ---------------- */
+
+function inferOpaqueBackgroundColor(start: HTMLElement): string {
+  // Walk up until a non-transparent background is found
+  let el: HTMLElement | null = start;
+
+  while (el) {
+    const parsed = parseRGBA(getComputedStyle(el).backgroundColor);
+    if (parsed && parsed.a > 0) {
+      return `rgb(${parsed.r}, ${parsed.g}, ${parsed.b})`; // force opaque to fully hide text
+    }
+    el = el.parentElement;
+  }
+
+  // Try body / html
+  const bodyParsed = parseRGBA(getComputedStyle(document.body).backgroundColor);
+  if (bodyParsed && bodyParsed.a > 0) return `rgb(${bodyParsed.r}, ${bodyParsed.g}, ${bodyParsed.b})`;
+
+  const htmlParsed = parseRGBA(getComputedStyle(document.documentElement).backgroundColor);
+  if (htmlParsed && htmlParsed.a > 0) return `rgb(${htmlParsed.r}, ${htmlParsed.g}, ${htmlParsed.b})`;
+
+  // Fallback
+  return 'white';
+}
+
+function parseRGBA(input: string | null | undefined):
+  | { r: number; g: number; b: number; a: number }
+  | null {
+  if (!input) return null;
+
+  const s = input.trim().toLowerCase();
+  if (s === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+
+  // rgb() / rgba()
+  const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/);
+  if (m) {
+    return {
+      r: clamp255(+m[1]),
+      g: clamp255(+m[2]),
+      b: clamp255(+m[3]),
+      a: m[4] !== undefined ? clamp01(+m[4]) : 1,
+    };
+  }
+
+  // hex #rgb/#rgba/#rrggbb/#rrggbbaa
+  const hex = s.replace('#', '');
+  if ([3, 4, 6, 8].includes(hex.length)) {
+    const { r, g, b, a } = hexToRgba(hex);
+    return { r, g, b, a };
+  }
+
+  return null;
+}
+
+function hexToRgba(hex: string) {
+  let r = 0, g = 0, b = 0, a = 1;
+  if (hex.length === 3 || hex.length === 4) {
+    r = parseInt(hex[0] + hex[0], 16);
+    g = parseInt(hex[1] + hex[1], 16);
+    b = parseInt(hex[2] + hex[2], 16);
+    if (hex.length === 4) a = parseInt(hex[3] + hex[3], 16) / 255;
+  } else if (hex.length === 6 || hex.length === 8) {
+    r = parseInt(hex.slice(0, 2), 16);
+    g = parseInt(hex.slice(2, 4), 16);
+    b = parseInt(hex.slice(4, 6), 16);
+    if (hex.length === 8) a = parseInt(hex.slice(6, 8), 16) / 255;
+  }
+  return { r, g, b, a };
+}
+
+function clamp255(n: number) { return Math.max(0, Math.min(255, Math.round(n))); }
+function clamp01(n: number) { return Math.max(0, Math.min(1, n)); }
