@@ -1,59 +1,170 @@
-# NgxOverflowReveal
+# ngx-overflow-reveal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
+[![npm version](https://img.shields.io/npm/v/ngx-overflow-reveal.svg)](https://www.npmjs.com/package/ngx-overflow-reveal)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Development server
+An Angular directive that automatically reveals the full text content on hover when it's overflowing its container. Perfect for truncated text, table cells, and responsive layouts.
 
-To start a local development server, run:
+## Features
+
+- **Automatic Detection** - Detects text overflow automatically (both horizontal and vertical)
+- **Hover Reveal** - Shows full content in an overlay panel on mouse hover
+- **Smart Positioning** - Automatically adjusts position to stay within viewport bounds
+- **Style Preservation** - Matches typography, colors, and styling from the original element
+- **Background Inference** - Intelligently detects background color to ensure proper text visibility
+- **Elevation Effect** - Optional elevated appearance with subtle shadow
+- **Lightweight** - Zero dependencies (except Angular peer dependencies)
+- **Performance Optimized** - Runs outside Angular zone for optimal performance
+- **Responsive** - Updates on window resize and scroll events
+
+## Installation
+
+```bash
+npm install ngx-overflow-reveal
+```
+
+## Usage
+
+### Basic Usage
+
+Import the directive in your component:
+
+```typescript
+import { Component } from '@angular/core';
+import { NgxOverflowRevealDirective } from 'ngx-overflow-reveal';
+
+@Component({
+  selector: 'app-demo',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <div
+      ngxOverflowReveal
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      This is a very long text that will be truncated and revealed on hover
+    </div>
+  `
+})
+export class DemoComponent {}
+```
+
+### With Elevated Effect
+
+Add the `ngxOverflowRevealElevated` input for a subtle shadow effect:
+
+```typescript
+@Component({
+  selector: 'app-demo',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealElevated]="true"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Elevated reveal with shadow effect
+    </div>
+  `
+})
+export class DemoComponent {}
+```
+
+### Table Cell Example
+
+```typescript
+@Component({
+  selector: 'app-table',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <table>
+      <tr>
+        <td
+          ngxOverflowReveal
+          [ngxOverflowRevealElevated]="true"
+          style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          {{ longDescription }}
+        </td>
+      </tr>
+    </table>
+  `
+})
+export class TableComponent {
+  longDescription = 'This is a very long description that would overflow the table cell...';
+}
+```
+
+## API
+
+### Directive Selector
+
+```typescript
+[ngxOverflowReveal]
+```
+
+### Inputs
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `ngxOverflowRevealElevated` | `boolean` | `false` | Enables elevated appearance with box shadow for the reveal panel |
+
+### Behavior
+
+The directive automatically:
+
+1. **Detects overflow** - Monitors both `scrollWidth > clientWidth` and `scrollHeight > clientHeight`
+2. **Creates reveal panel** - Generates a fixed-position overlay on mouseenter
+3. **Matches styles** - Copies typography, colors, padding, and font rendering properties
+4. **Infers background** - Walks up the DOM tree to find the first opaque background color
+5. **Adjusts position** - Repositions if the panel would overflow the viewport
+6. **Cleans up** - Removes panel on mouseleave and handles all event cleanup
+
+### Style Mirroring
+
+The following styles are automatically mirrored from the host element to the reveal panel:
+
+- Typography: `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`, `lineHeight`
+- Text rendering: `fontVariantNumeric`, `fontKerning`, `textRendering`, `-webkit-font-smoothing`, `-moz-osx-font-smoothing`
+- Text styling: `color`, `textTransform`, `textDecoration`
+- Layout: Base padding values (with additional padding in revealed state)
+
+## Browser Compatibility
+
+Works with all modern browsers that support:
+- ResizeObserver API
+- MutationObserver API
+- ES2015+
+
+## Performance Considerations
+
+- All mouse and scroll event listeners run **outside Angular zone** for optimal performance
+- ResizeObserver and MutationObserver are used for efficient change detection
+- Panel is created on-demand (only when overflow is detected)
+- Proper cleanup on component destroy prevents memory leaks
+
+## Development
+
+### Build the library
+
+```bash
+ng build ngx-overflow-reveal
+```
+
+### Run the demo
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Navigate to `http://localhost:4200/` to see the demo application.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Run tests
 
 ```bash
-ng generate component component-name
+ng test ngx-overflow-reveal
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Contributing
 
-```bash
-ng generate --help
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Building
+## License
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+MIT © [Rafayel Hovhannisyan](mailto:rafayel.hovhannisyan.95@gmail.com)
