@@ -1,0 +1,16 @@
+{
+  "name": "ngx-overflow-reveal",
+  "version": "0.0.1",
+  "description": "Angular directive to reveal full text on hover when overflowed.",
+  "keywords": ["angular", "directive", "overflow", "tooltip", "hover", "ngx"],
+  "author": "Rafayel Hovhannisyan <rafayel.hovhannisyan.95@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^20.3.0",
+    "@angular/core": "^20.3.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
