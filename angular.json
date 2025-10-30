@@ -4,22 +4,21 @@
   "cli": {
     "packageManager": "npm"
   },
-  "newProjectRoot": "projects",
   "projects": {
     "ngx-overflow-reveal": {
       "projectType": "library",
-      "root": "projects/ngx-overflow-reveal",
-      "sourceRoot": "projects/ngx-overflow-reveal/src",
+      "root": ".",
+      "sourceRoot": "src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngx-overflow-reveal/tsconfig.lib.prod.json"
+              "tsConfig": "tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngx-overflow-reveal/tsconfig.lib.json"
+              "tsConfig": "tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,7 +26,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/ngx-overflow-reveal/tsconfig.spec.json"
+            "tsConfig": "tsconfig.spec.json"
           }
         }
       }
@@ -39,24 +38,24 @@
           "style": "scss"
         }
       },
-      "root": "projects/demo",
-      "sourceRoot": "projects/demo/src",
+      "root": "src/demo",
+      "sourceRoot": "src/demo",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/demo/src/main.ts",
-            "tsConfig": "projects/demo/tsconfig.app.json",
+            "browser": "src/demo/main.ts",
+            "tsConfig": "src/demo/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/demo/public"
+                "input": "src/demo/public"
               }
             ],
             "styles": [
-              "projects/demo/src/styles.scss"
+              "src/demo/styles.scss"
             ]
           },
           "configurations": {
@@ -101,16 +100,16 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/demo/tsconfig.spec.json",
+            "tsConfig": "src/demo/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/demo/public"
+                "input": "src/demo/public"
               }
             ],
             "styles": [
-              "projects/demo/src/styles.scss"
+              "src/demo/styles.scss"
             ]
           }
         }
