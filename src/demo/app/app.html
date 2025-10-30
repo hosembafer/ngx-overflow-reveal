@@ -50,18 +50,12 @@
                   {{ product.description }}
                 </div>
               </td>
-              <td>
-                <div
-                  ngxOverflowReveal
+              <td ngxOverflowReveal
                   [ngxOverflowRevealElevated]="true"
                   class="table-cell-content">
-                  {{ product.category }}
-                </div>
+                {{ product.category }}
               </td>
-              <td
-                ngxOverflowReveal
-                [ngxOverflowRevealElevated]="true"
-                class="table-cell-content">
+              <td>
                 {{ product.price }}
               </td>
             </tr>

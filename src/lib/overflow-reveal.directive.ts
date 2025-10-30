@@ -1,6 +1,7 @@
 import {
   Directive, ElementRef, NgZone, OnDestroy, OnInit, Renderer2, inject, input
 } from '@angular/core';
+import { inferOpaqueBackgroundColor } from './color.utils';
 
 @Directive({
   selector: '[ngxOverflowReveal]',
@@ -94,13 +95,29 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     // For revealing content, use 'normal' white-space to allow proper wrapping
     const whiteSpace = 'normal';
 
+    // Check if host is a table cell (td or th) - skip minHeight for these
+    const isTableCell = this.host.tagName === 'TD' || this.host.tagName === 'TH';
+
+    // For table cells, use only minimum padding. For other elements, use effective padding.
+    const panelPaddingTop = isTableCell ? this.minPaddingY : effectivePaddingTop;
+    const panelPaddingRight = isTableCell ? this.minPaddingX : effectivePaddingRight;
+    const panelPaddingBottom = isTableCell ? this.minPaddingY : effectivePaddingBottom;
+    const panelPaddingLeft = isTableCell ? this.minPaddingX : effectivePaddingLeft;
+
+    // For table cells, calculate offsets based on minimum padding
+    const tableCellOffsetLeft = isTableCell ? this.minPaddingX - basePaddingLeft : offsetLeft;
+    const tableCellOffsetTop = isTableCell ? this.minPaddingY - basePaddingTop : offsetTop;
+    const tableCellOffsetRight = isTableCell ? this.minPaddingX - basePaddingRight : offsetRight;
+    const tableCellOffsetBottom = isTableCell ? this.minPaddingY - basePaddingBottom : offsetBottom;
+
     Object.assign(panel.style, {
       position: 'fixed',
-      left: `${rect.left - offsetLeft}px`,
-      top: `${rect.top - offsetTop}px`,
-      minWidth: `${rect.width + offsetLeft + offsetRight}px`,
+      left: `${rect.left - tableCellOffsetLeft}px`,
+      top: `${rect.top - tableCellOffsetTop}px`,
+      minWidth: `${rect.width + tableCellOffsetLeft + tableCellOffsetRight}px`,
       width: 'max-content',
-      minHeight: `${rect.height + offsetTop + offsetBottom}px`,
+      // Table cells should size naturally, other elements use minHeight
+      minHeight: isTableCell ? 'auto' : `${rect.height + offsetTop + offsetBottom}px`,
       maxHeight: 'none',
       zIndex: '2147483647',
       pointerEvents: 'none',
@@ -109,11 +126,11 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       whiteSpace: whiteSpace,
       boxSizing: 'border-box',
 
-      // Use effective padding (minimum or host's padding, whichever is larger)
-      paddingTop: `${effectivePaddingTop}px`,
-      paddingRight: `${effectivePaddingRight}px`,
-      paddingBottom: `${effectivePaddingBottom}px`,
-      paddingLeft: `${effectivePaddingLeft}px`,
+      // Use minimum padding for table cells, effective padding for others
+      paddingTop: `${panelPaddingTop}px`,
+      paddingRight: `${panelPaddingRight}px`,
+      paddingBottom: `${panelPaddingBottom}px`,
+      paddingLeft: `${panelPaddingLeft}px`,
 
       fontFamily: cs.fontFamily,
       fontSize: cs.fontSize,
@@ -151,8 +168,25 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     panel.innerHTML = this.host.innerHTML;
     document.body.appendChild(panel);
 
+    // For table cells with auto height, adjust vertical position based on vertical-align
+    if (isTableCell) {
+      const panelRect = panel.getBoundingClientRect();
+      const verticalAlign = cs.verticalAlign;
+
+      if (verticalAlign === 'middle') {
+        // Center the panel vertically within the cell, accounting for added padding
+        const cellContentHeight = rect.height + tableCellOffsetTop + tableCellOffsetBottom;
+        const verticalOffset = (cellContentHeight - panelRect.height) / 2;
+        panel.style.top = `${rect.top - tableCellOffsetTop + verticalOffset}px`;
+      } else if (verticalAlign === 'bottom') {
+        // Align panel to bottom of cell, accounting for added padding
+        panel.style.top = `${rect.bottom + tableCellOffsetBottom - panelRect.height}px`;
+      }
+      // For 'top' (default), the initial top position already accounts for tableCellOffsetTop
+    }
+
     // Adjust position if panel overflows the viewport
-    this.adjustPanelPosition(panel, rect, offsetLeft);
+    this.adjustPanelPosition(panel, rect, tableCellOffsetLeft);
   }
 
   private detach() {
@@ -182,14 +216,40 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const offsetRight = effectivePaddingRight - basePaddingRight;
     const offsetBottom = effectivePaddingBottom - basePaddingBottom;
 
-    this.panel.style.left = `${Math.round(rect.left - offsetLeft)}px`;
-    this.panel.style.top = `${Math.round(rect.top - offsetTop)}px`;
-    this.panel.style.minWidth = `${Math.round(rect.width + offsetLeft + offsetRight)}px`;
+    const isTableCell = this.host.tagName === 'TD' || this.host.tagName === 'TH';
+
+    // For table cells, calculate offsets based on minimum padding
+    const tableCellOffsetLeft = isTableCell ? this.minPaddingX - basePaddingLeft : offsetLeft;
+    const tableCellOffsetTop = isTableCell ? this.minPaddingY - basePaddingTop : offsetTop;
+    const tableCellOffsetRight = isTableCell ? this.minPaddingX - basePaddingRight : offsetRight;
+    const tableCellOffsetBottom = isTableCell ? this.minPaddingY - basePaddingBottom : offsetBottom;
+
+    this.panel.style.left = `${Math.round(rect.left - tableCellOffsetLeft)}px`;
+    this.panel.style.minWidth = `${Math.round(rect.width + tableCellOffsetLeft + tableCellOffsetRight)}px`;
     this.panel.style.width = 'max-content';
-    this.panel.style.minHeight = `${Math.round(rect.height + offsetTop + offsetBottom)}px`;
+
+    // For table cells, adjust vertical position based on vertical-align
+    if (isTableCell) {
+      const panelRect = this.panel.getBoundingClientRect();
+      const verticalAlign = cs.verticalAlign;
+
+      if (verticalAlign === 'middle') {
+        // Center the panel vertically within the cell, accounting for added padding
+        const cellContentHeight = rect.height + tableCellOffsetTop + tableCellOffsetBottom;
+        const verticalOffset = (cellContentHeight - panelRect.height) / 2;
+        this.panel.style.top = `${Math.round(rect.top - tableCellOffsetTop + verticalOffset)}px`;
+      } else if (verticalAlign === 'bottom') {
+        // Align panel to bottom of cell, accounting for added padding
+        this.panel.style.top = `${Math.round(rect.bottom + tableCellOffsetBottom - panelRect.height)}px`;
+      } else {
+        this.panel.style.top = `${Math.round(rect.top - tableCellOffsetTop)}px`;
+      }
+    } else {
+      this.panel.style.top = `${Math.round(rect.top - offsetTop)}px`;
+    }
 
     // Re-adjust position after updates
-    this.adjustPanelPosition(this.panel, rect, offsetLeft);
+    this.adjustPanelPosition(this.panel, rect, tableCellOffsetLeft);
   }
 
   private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect, offsetLeft = 0) {
@@ -217,76 +277,3 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     }
   }
 }
-
-/* ---------------- helpers: background inference ---------------- */
-
-function inferOpaqueBackgroundColor(start: HTMLElement): string {
-  // Walk up until a non-transparent background is found
-  let el: HTMLElement | null = start;
-
-  while (el) {
-    const parsed = parseRGBA(getComputedStyle(el).backgroundColor);
-    if (parsed && parsed.a > 0) {
-      return `rgb(${parsed.r}, ${parsed.g}, ${parsed.b})`; // force opaque to fully hide text
-    }
-    el = el.parentElement;
-  }
-
-  // Try body / html
-  const bodyParsed = parseRGBA(getComputedStyle(document.body).backgroundColor);
-  if (bodyParsed && bodyParsed.a > 0) return `rgb(${bodyParsed.r}, ${bodyParsed.g}, ${bodyParsed.b})`;
-
-  const htmlParsed = parseRGBA(getComputedStyle(document.documentElement).backgroundColor);
-  if (htmlParsed && htmlParsed.a > 0) return `rgb(${htmlParsed.r}, ${htmlParsed.g}, ${htmlParsed.b})`;
-
-  // Fallback
-  return 'white';
-}
-
-function parseRGBA(input: string | null | undefined):
-  | { r: number; g: number; b: number; a: number }
-  | null {
-  if (!input) return null;
-
-  const s = input.trim().toLowerCase();
-  if (s === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
-
-  // rgb() / rgba()
-  const m = s.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (m) {
-    return {
-      r: clamp255(+m[1]),
-      g: clamp255(+m[2]),
-      b: clamp255(+m[3]),
-      a: m[4] !== undefined ? clamp01(+m[4]) : 1,
-    };
-  }
-
-  // hex #rgb/#rgba/#rrggbb/#rrggbbaa
-  const hex = s.replace('#', '');
-  if ([3, 4, 6, 8].includes(hex.length)) {
-    const { r, g, b, a } = hexToRgba(hex);
-    return { r, g, b, a };
-  }
-
-  return null;
-}
-
-function hexToRgba(hex: string) {
-  let r = 0, g = 0, b = 0, a = 1;
-  if (hex.length === 3 || hex.length === 4) {
-    r = parseInt(hex[0] + hex[0], 16);
-    g = parseInt(hex[1] + hex[1], 16);
-    b = parseInt(hex[2] + hex[2], 16);
-    if (hex.length === 4) a = parseInt(hex[3] + hex[3], 16) / 255;
-  } else if (hex.length === 6 || hex.length === 8) {
-    r = parseInt(hex.slice(0, 2), 16);
-    g = parseInt(hex.slice(2, 4), 16);
-    b = parseInt(hex.slice(4, 6), 16);
-    if (hex.length === 8) a = parseInt(hex.slice(6, 8), 16) / 255;
-  }
-  return { r, g, b, a };
-}
-
-function clamp255(n: number) { return Math.max(0, Math.min(255, Math.round(n))); }
-function clamp01(n: number) { return Math.max(0, Math.min(1, n)); }
