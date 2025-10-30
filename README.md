@@ -3,8 +3,9 @@
 [![npm version](https://img.shields.io/npm/v/ngx-overflow-reveal?logo=npm&logoColor=CB3837)](https://www.npmjs.com/package/ngx-overflow-reveal)
 [![npm size](https://img.shields.io/bundlephobia/minzip/ngx-overflow-reveal?logo=javascript&logoColor=#F7DF1E)](https://bundlephobia.com/package/ngx-overflow-reveal)
 ![license](https://img.shields.io/github/license/hosembafer/ngx-overflow-reveal)
+[![demo](https://img.shields.io/badge/demo-StackBlitz-00b8ff?logo=stackblitz)](https://stackblitz.com/github/hosembafer/ngx-overflow-reveal)
 
-**ngx-overflow-reveal** is an Angular directive that automatically reveals the full text content on hover when it's overflowing its container. Perfect for truncated text, table cells, and responsive layouts.
+**ngx-overflow-reveal** is an Angular directive that automatically reveals the full text content on hover when it's overflowing its container. Perfect for truncated text, table cells, and responsive UIs.
 
 ## Features
 
@@ -19,6 +20,12 @@
 - **Lightweight** - Zero dependencies (except Angular peer dependencies)
 - **Performance Optimized** - Runs outside Angular zone for optimal performance
 - **Responsive** - Updates on window resize and scroll events
+
+## Demo
+
+Open the live demo on StackBlitz to try the directive without installing anything:
+
+- Online demo: https://stackblitz.com/github/hosembafer/ngx-overflow-reveal
 
 ## Installation
 
@@ -192,11 +199,17 @@ ng build ngx-overflow-reveal
 
 ### Run the demo
 
+You can run the demo locally:
+
 ```bash
 ng serve
 ```
 
 Navigate to `http://localhost:4200/` to see the demo application.
+
+Or open the live demo on StackBlitz to try it online without installing:
+
+- Online demo: https://stackblitz.com/github/hosembafer/ngx-overflow-reveal
 
 ### Run tests
 
