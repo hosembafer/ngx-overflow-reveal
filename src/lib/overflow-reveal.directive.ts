@@ -58,8 +58,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private attach() {
     if (this.panel) return;
 
-    const text = (this.host.textContent ?? '').trim();
-    if (!text) return;
+    // Check if element has any content
+    if (!this.host.textContent?.trim()) return;
 
     const panel = this.r2.createElement('div') as HTMLDivElement;
     this.panel = panel;
@@ -76,18 +76,26 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const basePaddingTop = parseFloat(cs.paddingTop) || 0;
     const basePaddingBottom = parseFloat(cs.paddingBottom) || 0;
 
+    // Use host's border-radius if it has one, otherwise use default for better appearance
+    const hostBorderRadius = parseFloat(cs.borderRadius) || 0;
+    const borderRadius = hostBorderRadius > 0 ? cs.borderRadius : '6px';
+
+    // For revealing content, use 'normal' white-space to allow proper wrapping
+    const whiteSpace = 'normal';
+
     Object.assign(panel.style, {
       position: 'fixed',
       left: `${rect.left - this.extraPaddingX}px`,
       top: `${rect.top - this.extraPaddingY}px`,
       minWidth: `${rect.width}px`,
-      width: 'max-content',       // expand to fit full text
-      height: `${rect.height + 2 * this.extraPaddingY}px`,
+      width: 'max-content',
+      minHeight: `${rect.height + 2 * this.extraPaddingY}px`,
+      maxHeight: 'none',
       zIndex: '2147483647',
       pointerEvents: 'none',
       backgroundColor: inferredBg,
-      overflow: 'visible',        // let text continue outside the host width
-      whiteSpace: 'nowrap',       // single-line continuation effect
+      overflow: 'visible',
+      whiteSpace: whiteSpace,
       boxSizing: 'border-box',
 
       // Mirror typography & padding from host, with additional padding for revealed state
@@ -111,7 +119,11 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       fontKerning: cs.fontKerning,
       textRendering: cs.textRendering,
 
-      borderRadius: '6px',
+      // Mirror border styles from host
+      borderWidth: cs.borderWidth,
+      borderStyle: cs.borderStyle,
+      borderColor: cs.borderColor,
+      borderRadius: borderRadius,
       backgroundClip: 'padding-box',
 
       // Elevation effect when enabled
@@ -124,7 +136,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     panel.style.setProperty('-webkit-font-smoothing', cs.getPropertyValue('-webkit-font-smoothing'));
     panel.style.setProperty('-moz-osx-font-smoothing', cs.getPropertyValue('-moz-osx-font-smoothing'));
 
-    panel.textContent = text;
+    // Always use innerHTML to preserve HTML structure (including <br> tags, etc.)
+    panel.innerHTML = this.host.innerHTML;
     document.body.appendChild(panel);
 
     // Adjust position if panel overflows the viewport
@@ -144,7 +157,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.panel.style.left = `${Math.round(rect.left - this.extraPaddingX)}px`;
     this.panel.style.top = `${Math.round(rect.top - this.extraPaddingY)}px`;
     this.panel.style.minWidth = `${Math.round(rect.width)}px`;
-    this.panel.style.height = `${Math.round(rect.height + 2 * this.extraPaddingY)}px`;
+    this.panel.style.width = 'max-content';
+    this.panel.style.minHeight = `${Math.round(rect.height + 2 * this.extraPaddingY)}px`;
 
     // Re-adjust position after updates
     this.adjustPanelPosition(this.panel, rect);
@@ -154,16 +168,25 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     // Get panel's actual width after rendering
     const panelRect = panel.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
+    const padding = 8; // Padding from viewport edge
 
-    const panelRight = hostRect.left - this.extraPaddingX + panelRect.width;
+    const panelLeft = hostRect.left - this.extraPaddingX;
+    const panelRight = panelLeft + panelRect.width;
 
-    if (panelRight > viewportWidth) {
-      // Calculate how much we need to shift left
-      const overflow = panelRight - viewportWidth;
-      const padding = 8; // Add small padding from viewport edge
-      const newLeft = Math.max(0, hostRect.left - this.extraPaddingX - overflow - padding);
+    if (panelRight > viewportWidth - padding) {
+      // Calculate available width
+      const availableWidth = viewportWidth - padding * 2;
+      const maxWidthFromLeft = viewportWidth - panelLeft - padding;
 
-      panel.style.left = `${Math.round(newLeft)}px`;
+      // If content is too wide for viewport, set max-width to allow wrapping
+      if (panelRect.width > availableWidth) {
+        panel.style.maxWidth = `${Math.round(availableWidth)}px`;
+        panel.style.left = `${padding}px`;
+      } else if (panelRight > viewportWidth - padding) {
+        // Content fits but needs repositioning
+        const newLeft = Math.max(padding, hostRect.left - this.extraPaddingX - (panelRight - viewportWidth + padding));
+        panel.style.left = `${Math.round(newLeft)}px`;
+      }
     }
   }
 }

@@ -50,6 +50,8 @@
                   ngxOverflowReveal
                   [ngxOverflowRevealElevated]="true"
                   class="table-cell-content">
+                  {{ product.name }}<br />
+                  {{ product.name }}<br />
                   {{ product.name }}
                 </div>
               </td>
@@ -69,7 +71,12 @@
                   {{ product.category }}
                 </div>
               </td>
-              <td>{{ product.price }}</td>
+              <td
+                ngxOverflowReveal
+                [ngxOverflowRevealElevated]="true"
+                class="table-cell-content">
+                {{ product.price }}
+              </td>
             </tr>
           }
         </tbody>
@@ -87,6 +94,14 @@
           ngxOverflowReveal
           class="truncated-text">
           This text is positioned at the left edge of the viewport and should expand correctly
+        </div>
+      </div>
+      <div class="edge-case-item">
+        <label>Left edge with extra long text:</label>
+        <div
+          ngxOverflowReveal
+          class="truncated-text">
+          This text is positioned at the left edge of the viewport and should expand correctly. This text is positioned at the left edge of the viewport and should expand correctly. This text is positioned at the left edge of the viewport and should expand correctly.
         </div>
       </div>
       <div class="edge-case-item" style="text-align: right;">
