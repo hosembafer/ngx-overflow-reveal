@@ -12,6 +12,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private r2 = inject(Renderer2);
 
   ngxOverflowRevealElevated = input<boolean>(false);
+  ngxOverflowRevealDelay = input<number>(0);
+  ngxOverflowRevealAnimated = input<boolean>(true);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -20,6 +22,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private onLeaveOff?: () => void;
   private onScrollOff?: () => void;
   private onResizeOff?: () => void;
+  private delayTimeoutId?: number;
   private readonly minPaddingX = 6; // Minimum horizontal padding in pixels
   private readonly minPaddingY = 4; // Minimum vertical padding in pixels
 
@@ -38,6 +41,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearDelayTimeout();
     this.detach();
     this.ro?.disconnect();
     this.mo?.disconnect();
@@ -49,7 +53,20 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
   private onEnter() {
     if (!this.isOverflowing(this.host)) return;
-    this.attach();
+
+    const delay = this.ngxOverflowRevealDelay();
+    if (delay > 0) {
+      this.delayTimeoutId = window.setTimeout(() => this.attach(), delay);
+    } else {
+      this.attach();
+    }
+  }
+
+  private clearDelayTimeout() {
+    if (this.delayTimeoutId !== undefined) {
+      window.clearTimeout(this.delayTimeoutId);
+      this.delayTimeoutId = undefined;
+    }
   }
 
   private isOverflowing(el: HTMLElement): boolean {
@@ -110,6 +127,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const tableCellOffsetRight = isTableCell ? this.minPaddingX - basePaddingRight : offsetRight;
     const tableCellOffsetBottom = isTableCell ? this.minPaddingY - basePaddingBottom : offsetBottom;
 
+    const isAnimated = this.ngxOverflowRevealAnimated();
+
     Object.assign(panel.style, {
       position: 'fixed',
       left: `${rect.left - tableCellOffsetLeft}px`,
@@ -158,6 +177,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       boxShadow: this.ngxOverflowRevealElevated()
         ? '0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.05)'
         : 'none',
+
+      // Animation properties
+      opacity: isAnimated ? '0' : '1',
+      transition: isAnimated ? 'opacity 150ms ease-in-out' : 'none',
     });
 
     // Set vendor-prefixed properties separately (not in standard CSSStyleDeclaration)
@@ -187,9 +210,20 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     // Adjust position if panel overflows the viewport
     this.adjustPanelPosition(panel, rect, tableCellOffsetLeft);
+
+    // Trigger fade-in animation
+    if (isAnimated) {
+      // Use requestAnimationFrame to ensure the initial opacity:0 is rendered
+      requestAnimationFrame(() => {
+        if (this.panel) {
+          this.panel.style.opacity = '1';
+        }
+      });
+    }
   }
 
   private detach() {
+    this.clearDelayTimeout();
     if (!this.panel) return;
     this.panel.remove();
     this.panel = undefined;

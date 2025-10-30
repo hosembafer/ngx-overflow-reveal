@@ -17,6 +17,52 @@
   </section>
 
   <section class="section">
+    <h2>Delay &amp; Animation</h2>
+    <p class="description">Control the reveal timing and animation behavior</p>
+    <div class="example-card">
+      <div class="feature-grid">
+        <div class="feature-item">
+          <label>With 500ms delay:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealDelay]="500"
+            class="truncated-text">
+            This text will reveal after a 500ms delay when you hover over it
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>With 1000ms delay:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealDelay]="1000"
+            class="truncated-text">
+            This text will reveal after a 1 second delay when you hover over it
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>Without animation:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealAnimated]="false"
+            class="truncated-text">
+            This text appears instantly without a fade-in animation effect
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>Delay + No animation:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealDelay]="800"
+            [ngxOverflowRevealAnimated]="false"
+            class="truncated-text">
+            This text has a delay but appears instantly without animation
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
     <h2>Data Table</h2>
     <p class="description">Table cells with overflowing content using elevated style</p>
     <div class="table-container">

@@ -66,6 +66,23 @@
   border: 1px solid #dee2e6;
 }
 
+// Feature Grid Styles
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-item {
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #495057;
+    font-size: 0.875rem;
+  }
+}
+
 // User List Styles
 .user-list {
   display: grid;

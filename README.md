@@ -13,6 +13,8 @@ An Angular directive that automatically reveals the full text content on hover w
 - **Style Preservation** - Matches typography, colors, and styling from the original element
 - **Background Inference** - Intelligently detects background color to ensure proper text visibility
 - **Elevation Effect** - Optional elevated appearance with subtle shadow
+- **Configurable Delay** - Optional delay before revealing the content on hover
+- **Animation Control** - Optional fade-in animation effect when revealing content
 - **Lightweight** - Zero dependencies (except Angular peer dependencies)
 - **Performance Optimized** - Runs outside Angular zone for optimal performance
 - **Responsive** - Updates on window resize and scroll events
@@ -91,6 +93,44 @@ export class TableComponent {
 }
 ```
 
+### With Delay and Animation Control
+
+Control the timing and animation behavior:
+
+```typescript
+@Component({
+  selector: 'app-demo',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <!-- Reveal after 500ms delay -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealDelay]="500"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Reveals after a 500ms delay
+    </div>
+
+    <!-- No fade-in animation -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealAnimated]="false"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Appears instantly without animation
+    </div>
+
+    <!-- Combined: delay + no animation -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealDelay]="800"
+      [ngxOverflowRevealAnimated]="false"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Reveals after 800ms with no animation
+    </div>
+  `
+})
+export class DemoComponent {}
+```
+
 ## API
 
 ### Directive Selector
@@ -104,6 +144,8 @@ export class TableComponent {
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `ngxOverflowRevealElevated` | `boolean` | `false` | Enables elevated appearance with box shadow for the reveal panel |
+| `ngxOverflowRevealDelay` | `number` | `0` | Delay in milliseconds before revealing the content on hover |
+| `ngxOverflowRevealAnimated` | `boolean` | `true` | Enables fade-in animation when revealing content |
 
 ### Behavior
 
