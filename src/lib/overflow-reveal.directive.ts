@@ -19,8 +19,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private onLeaveOff?: () => void;
   private onScrollOff?: () => void;
   private onResizeOff?: () => void;
-  private readonly extraPaddingX = 6; // Extra horizontal padding in pixels for revealed state
-  private readonly extraPaddingY = 4; // Extra vertical padding in pixels for revealed state
+  private readonly minPaddingX = 6; // Minimum horizontal padding in pixels
+  private readonly minPaddingY = 4; // Minimum vertical padding in pixels
 
   ngOnInit(): void {
     this.ro = new ResizeObserver(() => this.detach());
@@ -70,11 +70,22 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     // NEW: infer an opaque background color so the overlay hides original text
     const inferredBg = inferOpaqueBackgroundColor(this.host);
 
-    // Calculate additional padding for revealed state
+    // Calculate effective padding (ensure minimum padding without adding to existing padding)
     const basePaddingLeft = parseFloat(cs.paddingLeft) || 0;
     const basePaddingRight = parseFloat(cs.paddingRight) || 0;
     const basePaddingTop = parseFloat(cs.paddingTop) || 0;
     const basePaddingBottom = parseFloat(cs.paddingBottom) || 0;
+
+    const effectivePaddingLeft = Math.max(basePaddingLeft, this.minPaddingX);
+    const effectivePaddingRight = Math.max(basePaddingRight, this.minPaddingX);
+    const effectivePaddingTop = Math.max(basePaddingTop, this.minPaddingY);
+    const effectivePaddingBottom = Math.max(basePaddingBottom, this.minPaddingY);
+
+    // Calculate position offset (how much to shift the panel)
+    const offsetLeft = effectivePaddingLeft - basePaddingLeft;
+    const offsetTop = effectivePaddingTop - basePaddingTop;
+    const offsetRight = effectivePaddingRight - basePaddingRight;
+    const offsetBottom = effectivePaddingBottom - basePaddingBottom;
 
     // Use host's border-radius if it has one, otherwise use default for better appearance
     const hostBorderRadius = parseFloat(cs.borderRadius) || 0;
@@ -85,11 +96,11 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     Object.assign(panel.style, {
       position: 'fixed',
-      left: `${rect.left - this.extraPaddingX}px`,
-      top: `${rect.top - this.extraPaddingY}px`,
-      minWidth: `${rect.width}px`,
+      left: `${rect.left - offsetLeft}px`,
+      top: `${rect.top - offsetTop}px`,
+      minWidth: `${rect.width + offsetLeft + offsetRight}px`,
       width: 'max-content',
-      minHeight: `${rect.height + 2 * this.extraPaddingY}px`,
+      minHeight: `${rect.height + offsetTop + offsetBottom}px`,
       maxHeight: 'none',
       zIndex: '2147483647',
       pointerEvents: 'none',
@@ -98,11 +109,11 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       whiteSpace: whiteSpace,
       boxSizing: 'border-box',
 
-      // Mirror typography & padding from host, with additional padding for revealed state
-      paddingTop: `${basePaddingTop + this.extraPaddingY}px`,
-      paddingRight: `${basePaddingRight + this.extraPaddingX}px`,
-      paddingBottom: `${basePaddingBottom + this.extraPaddingY}px`,
-      paddingLeft: `${basePaddingLeft + this.extraPaddingX}px`,
+      // Use effective padding (minimum or host's padding, whichever is larger)
+      paddingTop: `${effectivePaddingTop}px`,
+      paddingRight: `${effectivePaddingRight}px`,
+      paddingBottom: `${effectivePaddingBottom}px`,
+      paddingLeft: `${effectivePaddingLeft}px`,
 
       fontFamily: cs.fontFamily,
       fontSize: cs.fontSize,
@@ -141,7 +152,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     document.body.appendChild(panel);
 
     // Adjust position if panel overflows the viewport
-    this.adjustPanelPosition(panel, rect);
+    this.adjustPanelPosition(panel, rect, offsetLeft);
   }
 
   private detach() {
@@ -152,31 +163,47 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
   private updatePosition() {
     if (!this.panel) return;
+    const cs = getComputedStyle(this.host);
     const rect = this.host.getBoundingClientRect();
 
-    this.panel.style.left = `${Math.round(rect.left - this.extraPaddingX)}px`;
-    this.panel.style.top = `${Math.round(rect.top - this.extraPaddingY)}px`;
-    this.panel.style.minWidth = `${Math.round(rect.width)}px`;
+    // Recalculate offsets for updated position
+    const basePaddingLeft = parseFloat(cs.paddingLeft) || 0;
+    const basePaddingRight = parseFloat(cs.paddingRight) || 0;
+    const basePaddingTop = parseFloat(cs.paddingTop) || 0;
+    const basePaddingBottom = parseFloat(cs.paddingBottom) || 0;
+
+    const effectivePaddingLeft = Math.max(basePaddingLeft, this.minPaddingX);
+    const effectivePaddingRight = Math.max(basePaddingRight, this.minPaddingX);
+    const effectivePaddingTop = Math.max(basePaddingTop, this.minPaddingY);
+    const effectivePaddingBottom = Math.max(basePaddingBottom, this.minPaddingY);
+
+    const offsetLeft = effectivePaddingLeft - basePaddingLeft;
+    const offsetTop = effectivePaddingTop - basePaddingTop;
+    const offsetRight = effectivePaddingRight - basePaddingRight;
+    const offsetBottom = effectivePaddingBottom - basePaddingBottom;
+
+    this.panel.style.left = `${Math.round(rect.left - offsetLeft)}px`;
+    this.panel.style.top = `${Math.round(rect.top - offsetTop)}px`;
+    this.panel.style.minWidth = `${Math.round(rect.width + offsetLeft + offsetRight)}px`;
     this.panel.style.width = 'max-content';
-    this.panel.style.minHeight = `${Math.round(rect.height + 2 * this.extraPaddingY)}px`;
+    this.panel.style.minHeight = `${Math.round(rect.height + offsetTop + offsetBottom)}px`;
 
     // Re-adjust position after updates
-    this.adjustPanelPosition(this.panel, rect);
+    this.adjustPanelPosition(this.panel, rect, offsetLeft);
   }
 
-  private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect) {
+  private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect, offsetLeft = 0) {
     // Get panel's actual width after rendering
     const panelRect = panel.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const padding = 8; // Padding from viewport edge
 
-    const panelLeft = hostRect.left - this.extraPaddingX;
+    const panelLeft = hostRect.left - offsetLeft;
     const panelRight = panelLeft + panelRect.width;
 
     if (panelRight > viewportWidth - padding) {
       // Calculate available width
       const availableWidth = viewportWidth - padding * 2;
-      const maxWidthFromLeft = viewportWidth - panelLeft - padding;
 
       // If content is too wide for viewport, set max-width to allow wrapping
       if (panelRect.width > availableWidth) {
@@ -184,7 +211,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
         panel.style.left = `${padding}px`;
       } else if (panelRight > viewportWidth - padding) {
         // Content fits but needs repositioning
-        const newLeft = Math.max(padding, hostRect.left - this.extraPaddingX - (panelRight - viewportWidth + padding));
+        const newLeft = Math.max(padding, panelLeft - (panelRight - viewportWidth + padding));
         panel.style.left = `${Math.round(newLeft)}px`;
       }
     }
