@@ -3,7 +3,8 @@
 [![npm version](https://img.shields.io/npm/v/ngx-overflow-reveal?logo=npm&logoColor=CB3837)](https://www.npmjs.com/package/ngx-overflow-reveal)
 [![npm size](https://img.shields.io/bundlephobia/minzip/ngx-overflow-reveal?logo=javascript&logoColor=#F7DF1E)](https://bundlephobia.com/package/ngx-overflow-reveal)
 ![license](https://img.shields.io/github/license/hosembafer/ngx-overflow-reveal)
-An Angular directive that automatically reveals the full text content on hover when it's overflowing its container. Perfect for truncated text, table cells, and responsive layouts.
+
+**ngx-overflow-reveal** is an Angular directive that automatically reveals the full text content on hover when it's overflowing its container. Perfect for truncated text, table cells, and responsive layouts.
 
 ## Features
 
