@@ -35,7 +35,7 @@ npm install ngx-overflow-reveal
 
 ## Usage
 
-Import the directive in your component and apply it to any element that may overflow:
+Import the directive in your component:
 
 ```typescript
 import { Component } from '@angular/core';
@@ -44,42 +44,46 @@ import { NgxOverflowRevealDirective } from 'ngx-overflow-reveal';
 @Component({
   selector: 'app-demo',
   imports: [NgxOverflowRevealDirective],
-  template: `
-    <!-- Basic usage -->
-    <div
-      ngxOverflowReveal
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      This is a very long text that will be truncated and revealed on hover
-    </div>
-
-    <!-- All options combined -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealElevated]="true"
-      [ngxOverflowRevealDelay]="500"
-      [ngxOverflowRevealAnimated]="false"
-      [ngxOverflowRevealMaxWidth]="400"
-      [ngxOverflowRevealViewportPadding]="48"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Fully customized reveal with all options
-    </div>
-
-    <!-- Table cell example -->
-    <table>
-      <tr>
-        <td
-          ngxOverflowReveal
-          [ngxOverflowRevealElevated]="true"
-          style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          {{ longDescription }}
-        </td>
-      </tr>
-    </table>
-  `
+  template: `...`
 })
 export class DemoComponent {
   longDescription = 'This is a very long description that would overflow the table cell...';
 }
+```
+
+Apply it to any element that may overflow:
+
+```html
+<!-- Basic usage -->
+<div
+  ngxOverflowReveal
+  style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+  This is a very long text that will be truncated and revealed on hover
+</div>
+
+<!-- All options combined -->
+<div
+  ngxOverflowReveal
+  [ngxOverflowRevealElevated]="true"
+  [ngxOverflowRevealDelay]="500"
+  [ngxOverflowRevealAnimated]="false"
+  [ngxOverflowRevealMaxWidth]="400"
+  [ngxOverflowRevealViewportPadding]="48"
+  style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+  Fully customized reveal with all options
+</div>
+
+<!-- Table cell example -->
+<table>
+  <tr>
+    <td
+      ngxOverflowReveal
+      [ngxOverflowRevealElevated]="true"
+      style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      {{ longDescription }}
+    </td>
+  </tr>
+</table>
 ```
 
 ## API
