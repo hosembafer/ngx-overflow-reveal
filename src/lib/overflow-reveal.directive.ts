@@ -14,6 +14,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   ngxOverflowRevealElevated = input<boolean>(false);
   ngxOverflowRevealDelay = input<number>(0);
   ngxOverflowRevealAnimated = input<boolean>(true);
+  ngxOverflowRevealMaxWidth = input<number | undefined>(undefined);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -128,6 +129,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const tableCellOffsetBottom = isTableCell ? this.minPaddingY - basePaddingBottom : offsetBottom;
 
     const isAnimated = this.ngxOverflowRevealAnimated();
+    const maxWidth = this.ngxOverflowRevealMaxWidth();
 
     Object.assign(panel.style, {
       position: 'fixed',
@@ -135,6 +137,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       top: `${rect.top - tableCellOffsetTop}px`,
       minWidth: `${rect.width + tableCellOffsetLeft + tableCellOffsetRight}px`,
       width: 'max-content',
+      maxWidth: maxWidth !== undefined ? `${maxWidth}px` : 'none',
       // Table cells should size naturally, other elements use minHeight
       minHeight: isTableCell ? 'auto' : `${rect.height + offsetTop + offsetBottom}px`,
       maxHeight: 'none',
@@ -258,9 +261,12 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const tableCellOffsetRight = isTableCell ? this.minPaddingX - basePaddingRight : offsetRight;
     const tableCellOffsetBottom = isTableCell ? this.minPaddingY - basePaddingBottom : offsetBottom;
 
+    const maxWidth = this.ngxOverflowRevealMaxWidth();
+
     this.panel.style.left = `${Math.round(rect.left - tableCellOffsetLeft)}px`;
     this.panel.style.minWidth = `${Math.round(rect.width + tableCellOffsetLeft + tableCellOffsetRight)}px`;
     this.panel.style.width = 'max-content';
+    this.panel.style.maxWidth = maxWidth !== undefined ? `${maxWidth}px` : 'none';
 
     // For table cells, adjust vertical position based on vertical-align
     if (isTableCell) {
@@ -287,6 +293,13 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   }
 
   private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect, offsetLeft = 0) {
+    const userMaxWidth = this.ngxOverflowRevealMaxWidth();
+
+    // If user specified a max-width, don't override it with automatic adjustments
+    if (userMaxWidth !== undefined) {
+      return;
+    }
+
     // Get panel's actual width after rendering
     const panelRect = panel.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
@@ -295,19 +308,12 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     const panelLeft = hostRect.left - offsetLeft;
     const panelRight = panelLeft + panelRect.width;
 
-    if (panelRight > viewportWidth - padding) {
-      // Calculate available width
-      const availableWidth = viewportWidth - padding * 2;
+    // Calculate the maximum width available from the panel's left position to the viewport edge
+    const maxAvailableWidth = viewportWidth - panelLeft - padding;
 
-      // If content is too wide for viewport, set max-width to allow wrapping
-      if (panelRect.width > availableWidth) {
-        panel.style.maxWidth = `${Math.round(availableWidth)}px`;
-        panel.style.left = `${padding}px`;
-      } else if (panelRight > viewportWidth - padding) {
-        // Content fits but needs repositioning
-        const newLeft = Math.max(padding, panelLeft - (panelRight - viewportWidth + padding));
-        panel.style.left = `${Math.round(newLeft)}px`;
-      }
+    // If content extends beyond viewport, constrain it with max-width (but keep left position)
+    if (panelRight > viewportWidth - padding && maxAvailableWidth > 0) {
+      panel.style.maxWidth = `${Math.round(maxAvailableWidth)}px`;
     }
   }
 }

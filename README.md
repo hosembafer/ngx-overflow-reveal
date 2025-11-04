@@ -139,6 +139,36 @@ Control the timing and animation behavior:
 export class DemoComponent {}
 ```
 
+### With Maximum Width Control
+
+Constrain the revealed panel width while preserving the left alignment:
+
+```typescript
+@Component({
+  selector: 'app-demo',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <!-- Constrain revealed content to 500px width -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealMaxWidth]="500"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      This long text will reveal in a panel with maximum 500px width, wrapping as needed
+    </div>
+
+    <!-- Combine with elevation effect -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealMaxWidth]="400"
+      [ngxOverflowRevealElevated]="true"
+      style="width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Constrained width with elevated appearance
+    </div>
+  `
+})
+export class DemoComponent {}
+```
+
 ## API
 
 ### Directive Selector
@@ -154,6 +184,7 @@ export class DemoComponent {}
 | `ngxOverflowRevealElevated` | `boolean` | `false` | Enables elevated appearance with box shadow for the reveal panel |
 | `ngxOverflowRevealDelay` | `number` | `0` | Delay in milliseconds before revealing the content on hover |
 | `ngxOverflowRevealAnimated` | `boolean` | `true` | Enables fade-in animation when revealing content |
+| `ngxOverflowRevealMaxWidth` | `number \| undefined` | `undefined` | Maximum width in pixels for the revealed panel. When set, constrains the panel width while preserving left alignment. Content will wrap if it exceeds this width. |
 
 ### Behavior
 
