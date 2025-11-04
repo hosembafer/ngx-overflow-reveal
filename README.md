@@ -35,9 +35,7 @@ npm install ngx-overflow-reveal
 
 ## Usage
 
-### Basic Usage
-
-Import the directive in your component:
+Import the directive in your component and apply it to any element that may overflow:
 
 ```typescript
 import { Component } from '@angular/core';
@@ -47,43 +45,26 @@ import { NgxOverflowRevealDirective } from 'ngx-overflow-reveal';
   selector: 'app-demo',
   imports: [NgxOverflowRevealDirective],
   template: `
+    <!-- Basic usage -->
     <div
       ngxOverflowReveal
       style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
       This is a very long text that will be truncated and revealed on hover
     </div>
-  `
-})
-export class DemoComponent {}
-```
 
-### With Elevated Effect
-
-Add the `ngxOverflowRevealElevated` input for a subtle shadow effect:
-
-```typescript
-@Component({
-  selector: 'app-demo',
-  imports: [NgxOverflowRevealDirective],
-  template: `
+    <!-- All options combined -->
     <div
       ngxOverflowReveal
       [ngxOverflowRevealElevated]="true"
+      [ngxOverflowRevealDelay]="500"
+      [ngxOverflowRevealAnimated]="false"
+      [ngxOverflowRevealMaxWidth]="400"
+      [ngxOverflowRevealViewportPadding]="48"
       style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Elevated reveal with shadow effect
+      Fully customized reveal with all options
     </div>
-  `
-})
-export class DemoComponent {}
-```
 
-### Table Cell Example
-
-```typescript
-@Component({
-  selector: 'app-table',
-  imports: [NgxOverflowRevealDirective],
-  template: `
+    <!-- Table cell example -->
     <table>
       <tr>
         <td
@@ -96,106 +77,9 @@ export class DemoComponent {}
     </table>
   `
 })
-export class TableComponent {
+export class DemoComponent {
   longDescription = 'This is a very long description that would overflow the table cell...';
 }
-```
-
-### With Delay and Animation Control
-
-Control the timing and animation behavior:
-
-```typescript
-@Component({
-  selector: 'app-demo',
-  imports: [NgxOverflowRevealDirective],
-  template: `
-    <!-- Reveal after 500ms delay -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealDelay]="500"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Reveals after a 500ms delay
-    </div>
-
-    <!-- No fade-in animation -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealAnimated]="false"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Appears instantly without animation
-    </div>
-
-    <!-- Combined: delay + no animation -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealDelay]="800"
-      [ngxOverflowRevealAnimated]="false"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Reveals after 800ms with no animation
-    </div>
-  `
-})
-export class DemoComponent {}
-```
-
-### With Maximum Width Control
-
-Constrain the revealed panel width while preserving the left alignment:
-
-```typescript
-@Component({
-  selector: 'app-demo',
-  imports: [NgxOverflowRevealDirective],
-  template: `
-    <!-- Constrain revealed content to 500px width -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealMaxWidth]="500"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      This long text will reveal in a panel with maximum 500px width, wrapping as needed
-    </div>
-
-    <!-- Combine with elevation effect -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealMaxWidth]="400"
-      [ngxOverflowRevealElevated]="true"
-      style="width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Constrained width with elevated appearance
-    </div>
-  `
-})
-export class DemoComponent {}
-```
-
-### With Viewport Padding Control
-
-Adjust the space between the revealed panel and viewport edge:
-
-```typescript
-@Component({
-  selector: 'app-demo',
-  imports: [NgxOverflowRevealDirective],
-  template: `
-    <!-- Custom viewport padding of 48px -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealViewportPadding]="48"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Panel will maintain 48px space from viewport edge
-    </div>
-
-    <!-- Minimal viewport padding of 8px -->
-    <div
-      ngxOverflowReveal
-      [ngxOverflowRevealViewportPadding]="8"
-      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-      Panel can get closer to viewport edge with 8px padding
-    </div>
-  `
-})
-export class DemoComponent {}
 ```
 
 ## API
