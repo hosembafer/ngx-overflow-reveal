@@ -12,9 +12,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private r2 = inject(Renderer2);
 
   ngxOverflowRevealElevated = input<boolean>(false);
-  ngxOverflowRevealDelay = input<number>(0);
+  ngxOverflowRevealDelay = input<number>(120);
   ngxOverflowRevealAnimated = input<boolean>(true);
   ngxOverflowRevealMaxWidth = input<number | undefined>(undefined);
+  ngxOverflowRevealViewportPadding = input<number>(24);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -303,7 +304,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     // Get panel's actual width after rendering
     const panelRect = panel.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
-    const padding = 8; // Padding from viewport edge
+    const padding = this.ngxOverflowRevealViewportPadding();
 
     const panelLeft = hostRect.left - offsetLeft;
     const panelRight = panelLeft + panelRect.width;

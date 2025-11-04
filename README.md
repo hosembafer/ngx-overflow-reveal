@@ -169,6 +169,35 @@ Constrain the revealed panel width while preserving the left alignment:
 export class DemoComponent {}
 ```
 
+### With Viewport Padding Control
+
+Adjust the space between the revealed panel and viewport edge:
+
+```typescript
+@Component({
+  selector: 'app-demo',
+  imports: [NgxOverflowRevealDirective],
+  template: `
+    <!-- Custom viewport padding of 48px -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealViewportPadding]="48"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Panel will maintain 48px space from viewport edge
+    </div>
+
+    <!-- Minimal viewport padding of 8px -->
+    <div
+      ngxOverflowReveal
+      [ngxOverflowRevealViewportPadding]="8"
+      style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      Panel can get closer to viewport edge with 8px padding
+    </div>
+  `
+})
+export class DemoComponent {}
+```
+
 ## API
 
 ### Directive Selector
@@ -182,9 +211,10 @@ export class DemoComponent {}
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
 | `ngxOverflowRevealElevated` | `boolean` | `false` | Enables elevated appearance with box shadow for the reveal panel |
-| `ngxOverflowRevealDelay` | `number` | `0` | Delay in milliseconds before revealing the content on hover |
+| `ngxOverflowRevealDelay` | `number` | `120` | Delay in milliseconds before revealing the content on hover |
 | `ngxOverflowRevealAnimated` | `boolean` | `true` | Enables fade-in animation when revealing content |
 | `ngxOverflowRevealMaxWidth` | `number \| undefined` | `undefined` | Maximum width in pixels for the revealed panel. When set, constrains the panel width while preserving left alignment. Content will wrap if it exceeds this width. |
+| `ngxOverflowRevealViewportPadding` | `number` | `24` | Space in pixels between the revealed panel and the viewport edge. Used when automatically constraining panel width to prevent overflow. |
 
 ### Behavior
 
