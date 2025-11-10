@@ -25,6 +25,9 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private onScrollOff?: () => void;
   private onResizeOff?: () => void;
   private delayTimeoutId?: number;
+  private detachTimeoutId?: number;
+  private onPanelEnterOff?: () => void;
+  private onPanelLeaveOff?: () => void;
   private readonly minPaddingX = 6; // Minimum horizontal padding in pixels
   private readonly minPaddingY = 4; // Minimum vertical padding in pixels
 
@@ -36,7 +39,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     this.zone.runOutsideAngular(() => {
       this.onEnterOff  = this.r2.listen(this.host, 'mouseenter', () => this.onEnter());
-      this.onLeaveOff  = this.r2.listen(this.host, 'mouseleave', () => this.detach());
+      this.onLeaveOff  = this.r2.listen(this.host, 'mouseleave', () => this.scheduleDetach());
       this.onScrollOff = this.r2.listen(window, 'scroll', () => this.updatePosition());
       this.onResizeOff = this.r2.listen(window, 'resize', () => this.updatePosition());
     });
@@ -44,6 +47,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearDelayTimeout();
+    this.clearDetachTimeout();
     this.detach();
     this.ro?.disconnect();
     this.mo?.disconnect();
@@ -51,6 +55,8 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.onLeaveOff?.();
     this.onScrollOff?.();
     this.onResizeOff?.();
+    this.onPanelEnterOff?.();
+    this.onPanelLeaveOff?.();
   }
 
   private onEnter() {
@@ -69,6 +75,18 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       window.clearTimeout(this.delayTimeoutId);
       this.delayTimeoutId = undefined;
     }
+  }
+
+  private clearDetachTimeout() {
+    if (this.detachTimeoutId !== undefined) {
+      window.clearTimeout(this.detachTimeoutId);
+      this.detachTimeoutId = undefined;
+    }
+  }
+
+  private scheduleDetach() {
+    // Use a small delay to allow mouse to move from host to panel
+    this.detachTimeoutId = window.setTimeout(() => this.detach(), 50);
   }
 
   private isOverflowing(el: HTMLElement): boolean {
@@ -143,7 +161,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       minHeight: isTableCell ? 'auto' : `${rect.height + offsetTop + offsetBottom}px`,
       maxHeight: 'none',
       zIndex: '2147483647',
-      pointerEvents: 'none',
+      pointerEvents: 'auto',
       backgroundColor: inferredBg,
       overflow: 'visible',
       whiteSpace: whiteSpace,
@@ -195,6 +213,12 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     panel.innerHTML = this.host.innerHTML;
     document.body.appendChild(panel);
 
+    // Add event listeners to panel to keep it visible when hovering and allow text selection
+    this.zone.runOutsideAngular(() => {
+      this.onPanelEnterOff = this.r2.listen(panel, 'mouseenter', () => this.clearDetachTimeout());
+      this.onPanelLeaveOff = this.r2.listen(panel, 'mouseleave', () => this.detach());
+    });
+
     // For table cells with auto height, adjust vertical position based on vertical-align
     if (isTableCell) {
       const panelRect = panel.getBoundingClientRect();
@@ -228,7 +252,12 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
   private detach() {
     this.clearDelayTimeout();
+    this.clearDetachTimeout();
     if (!this.panel) return;
+    this.onPanelEnterOff?.();
+    this.onPanelLeaveOff?.();
+    this.onPanelEnterOff = undefined;
+    this.onPanelLeaveOff = undefined;
     this.panel.remove();
     this.panel = undefined;
   }
