@@ -103,6 +103,7 @@ Apply it to any element that may overflow:
 | `ngxOverflowRevealAnimated` | `boolean` | `true` | Enables fade-in animation when revealing content |
 | `ngxOverflowRevealMaxWidth` | `number \| undefined` | `undefined` | Maximum width in pixels for the revealed panel. When set, constrains the panel width while preserving left alignment. Content will wrap if it exceeds this width. |
 | `ngxOverflowRevealViewportPadding` | `number` | `24` | Space in pixels between the revealed panel and the viewport edge. Used when automatically constraining panel width to prevent overflow. |
+| `ngxOverflowRevealPanelClass` | `string \| string[] \| undefined` | `undefined` | CSS class(es) to apply to the revealed panel. Allows full customization of panel styling (e.g., custom shadow, border, background). Can be a single class name or an array of class names. |
 
 ### Behavior
 

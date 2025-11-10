@@ -16,6 +16,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   ngxOverflowRevealAnimated = input<boolean>(true);
   ngxOverflowRevealMaxWidth = input<number | undefined>(undefined);
   ngxOverflowRevealViewportPadding = input<number>(24);
+  ngxOverflowRevealPanelClass = input<string | string[] | undefined>(undefined);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -211,6 +212,17 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     // Always use innerHTML to preserve HTML structure (including <br> tags, etc.)
     panel.innerHTML = this.host.innerHTML;
+
+    // Apply custom panel class if provided
+    const panelClass = this.ngxOverflowRevealPanelClass();
+    if (panelClass) {
+      if (Array.isArray(panelClass)) {
+        panelClass.forEach(cls => this.r2.addClass(panel, cls));
+      } else {
+        this.r2.addClass(panel, panelClass);
+      }
+    }
+
     document.body.appendChild(panel);
 
     // Add event listeners to panel to keep it visible when hovering and allow text selection
