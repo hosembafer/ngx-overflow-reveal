@@ -69,17 +69,8 @@ Apply it to any element that may overflow:
   [ngxOverflowRevealAnimated]="false"
   [ngxOverflowRevealMaxWidth]="400"
   [ngxOverflowRevealViewportPadding]="48"
-  [ngxOverflowRevealPanelClass]="'custom-panel'"
   style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
   Fully customized reveal with all options
-</div>
-
-<!-- Custom panel styling with CSS class -->
-<div
-  ngxOverflowReveal
-  [ngxOverflowRevealPanelClass]="'custom-shadow'"
-  style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-  Panel with custom shadow and border
 </div>
 
 <!-- Table cell example -->
