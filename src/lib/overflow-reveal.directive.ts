@@ -93,6 +93,21 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   }
 
   private isOverflowing(el: HTMLElement): boolean {
+    const cs = getComputedStyle(el);
+    const display = cs.display;
+
+    // For pure inline elements (not inline-block, inline-flex, etc.), temporarily set to inline-block
+    // to get accurate overflow measurements. Pure inline elements don't have proper scrollWidth/clientWidth
+    // values for overflow detection as they don't establish a box model in the same way.
+    if (display === 'inline') {
+      const originalDisplay = el.style.display;
+      el.style.display = 'inline-block';
+      const hasOverflow = el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight;
+      // Restore original display (empty string to use CSS value)
+      el.style.display = originalDisplay;
+      return hasOverflow;
+    }
+
     return el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight;
   }
 
