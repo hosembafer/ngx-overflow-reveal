@@ -29,6 +29,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private detachTimeoutId?: number;
   private onPanelEnterOff?: () => void;
   private onPanelLeaveOff?: () => void;
+  private onPanelWheelOff?: () => void;
   private readonly minPaddingX = 6; // Minimum horizontal padding in pixels
   private readonly minPaddingY = 4; // Minimum vertical padding in pixels
 
@@ -58,6 +59,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.onResizeOff?.();
     this.onPanelEnterOff?.();
     this.onPanelLeaveOff?.();
+    this.onPanelWheelOff?.();
   }
 
   private onEnter() {
@@ -229,6 +231,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.zone.runOutsideAngular(() => {
       this.onPanelEnterOff = this.r2.listen(panel, 'mouseenter', () => this.clearDetachTimeout());
       this.onPanelLeaveOff = this.r2.listen(panel, 'mouseleave', () => this.detach());
+      // Pass through scroll events to allow scrolling the page when hovering over panel
+      this.onPanelWheelOff = this.r2.listen(panel, 'wheel', (e: WheelEvent) => {
+        window.scrollBy(e.deltaX, e.deltaY);
+      });
     });
 
     // For table cells with auto height, adjust vertical position based on vertical-align
@@ -268,8 +274,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     if (!this.panel) return;
     this.onPanelEnterOff?.();
     this.onPanelLeaveOff?.();
+    this.onPanelWheelOff?.();
     this.onPanelEnterOff = undefined;
     this.onPanelLeaveOff = undefined;
+    this.onPanelWheelOff = undefined;
     this.panel.remove();
     this.panel = undefined;
   }
