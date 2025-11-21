@@ -29,6 +29,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   private detachTimeoutId?: number;
   private onPanelEnterOff?: () => void;
   private onPanelLeaveOff?: () => void;
+  private onPanelWheelOff?: () => void;
   private readonly minPaddingX = 6; // Minimum horizontal padding in pixels
   private readonly minPaddingY = 4; // Minimum vertical padding in pixels
 
@@ -58,6 +59,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.onResizeOff?.();
     this.onPanelEnterOff?.();
     this.onPanelLeaveOff?.();
+    this.onPanelWheelOff?.();
   }
 
   private onEnter() {
@@ -229,6 +231,16 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     this.zone.runOutsideAngular(() => {
       this.onPanelEnterOff = this.r2.listen(panel, 'mouseenter', () => this.clearDetachTimeout());
       this.onPanelLeaveOff = this.r2.listen(panel, 'mouseleave', () => this.detach());
+      // Pass through scroll events to allow scrolling when hovering over panel
+      this.onPanelWheelOff = this.r2.listen(panel, 'wheel', (e: WheelEvent) => {
+        const scrollableParent = this.findScrollableParent(this.host);
+        if (scrollableParent === window) {
+          window.scrollBy(e.deltaX, e.deltaY);
+        } else {
+          (scrollableParent as HTMLElement).scrollTop += e.deltaY;
+          (scrollableParent as HTMLElement).scrollLeft += e.deltaX;
+        }
+      });
     });
 
     // For table cells with auto height, adjust vertical position based on vertical-align
@@ -268,8 +280,10 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     if (!this.panel) return;
     this.onPanelEnterOff?.();
     this.onPanelLeaveOff?.();
+    this.onPanelWheelOff?.();
     this.onPanelEnterOff = undefined;
     this.onPanelLeaveOff = undefined;
+    this.onPanelWheelOff = undefined;
     this.panel.remove();
     this.panel = undefined;
   }
@@ -332,6 +346,29 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
 
     // Re-adjust position after updates
     this.adjustPanelPosition(this.panel, rect, tableCellOffsetLeft);
+  }
+
+  private findScrollableParent(element: HTMLElement): Element | Window {
+    let parent = element.parentElement;
+
+    while (parent) {
+      const style = getComputedStyle(parent);
+      const overflowY = style.overflowY;
+      const overflowX = style.overflowX;
+
+      // Check if element is scrollable
+      if ((overflowY === 'auto' || overflowY === 'scroll' || overflowX === 'auto' || overflowX === 'scroll')) {
+        // Verify it actually has scrollable content
+        if (parent.scrollHeight > parent.clientHeight || parent.scrollWidth > parent.clientWidth) {
+          return parent;
+        }
+      }
+
+      parent = parent.parentElement;
+    }
+
+    // Default to window if no scrollable parent found
+    return window;
   }
 
   private adjustPanelPosition(panel: HTMLDivElement, hostRect: DOMRect, offsetLeft = 0) {
