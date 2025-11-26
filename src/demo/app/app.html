@@ -168,6 +168,51 @@
     </div>
   </section>
 
+  <section class="section">
+    <h2>Custom Box Shadow</h2>
+    <p class="description">Customize the box shadow for the reveal panel</p>
+    <div class="example-card">
+      <div class="feature-grid">
+        <div class="feature-item">
+          <label>Default elevated shadow:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealElevated]="true"
+            class="truncated-text">
+            This text uses the default elevated shadow effect when revealed
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>Custom blue shadow:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealBoxShadow]="'0 4px 20px rgba(37, 99, 235, 0.3)'"
+            class="truncated-text">
+            This text uses a custom blue shadow effect when revealed
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>Custom red shadow:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealBoxShadow]="'0 8px 24px rgba(220, 38, 38, 0.35)'"
+            class="truncated-text">
+            This text uses a custom red shadow with larger blur when revealed
+          </div>
+        </div>
+        <div class="feature-item">
+          <label>No shadow:</label>
+          <div
+            ngxOverflowReveal
+            [ngxOverflowRevealBoxShadow]="'none'"
+            class="truncated-text">
+            This text has no shadow at all when revealed for a flat design
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
     <p>Built with Angular {{ angularVersion }}</p>
     <a href="https://github.com/your-repo/ngx-overflow-reveal" target="_blank" rel="noopener">
