@@ -61,6 +61,14 @@ Apply it to any element that may overflow:
   This is a very long text that will be truncated and revealed on hover
 </div>
 
+<!-- Custom box shadow -->
+<div
+  ngxOverflowReveal
+  [ngxOverflowRevealBoxShadow]="'0 4px 12px rgba(0, 0, 0, 0.15)'"
+  style="width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+  Custom shadow effect on reveal
+</div>
+
 <!-- All options combined -->
 <div
   ngxOverflowReveal
@@ -104,6 +112,7 @@ Apply it to any element that may overflow:
 | `ngxOverflowRevealMaxWidth` | `number \| undefined` | `undefined` | Maximum width in pixels for the revealed panel. When set, constrains the panel width while preserving left alignment. Content will wrap if it exceeds this width. |
 | `ngxOverflowRevealViewportPadding` | `number` | `24` | Space in pixels between the revealed panel and the viewport edge. Used when automatically constraining panel width to prevent overflow. |
 | `ngxOverflowRevealPanelClass` | `string \| string[] \| undefined` | `undefined` | CSS class(es) to apply to the revealed panel. Allows full customization of panel styling (e.g., custom shadow, border, background). Can be a single class name or an array of class names. |
+| `ngxOverflowRevealBoxShadow` | `string \| undefined` | `undefined` | Custom box shadow CSS value for the reveal panel. When provided, overrides the default elevated shadow. Set to `'none'` to remove shadow entirely, or provide any valid CSS box-shadow value. Takes precedence over `ngxOverflowRevealElevated`. |
 
 ### Behavior
 

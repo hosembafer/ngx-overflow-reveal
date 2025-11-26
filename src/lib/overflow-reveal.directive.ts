@@ -17,6 +17,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
   ngxOverflowRevealMaxWidth = input<number | undefined>(undefined);
   ngxOverflowRevealViewportPadding = input<number>(24);
   ngxOverflowRevealPanelClass = input<string | string[] | undefined>(undefined);
+  ngxOverflowRevealBoxShadow = input<string | undefined>(undefined);
 
   private panel?: HTMLDivElement;
   private ro?: ResizeObserver;
@@ -214,9 +215,7 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
       backgroundClip: 'padding-box',
 
       // Elevation effect when enabled
-      boxShadow: this.ngxOverflowRevealElevated()
-        ? '0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.05)'
-        : 'none',
+      boxShadow: this.getBoxShadow(),
 
       // Animation properties
       opacity: isAnimated ? '0' : '1',
@@ -409,5 +408,16 @@ export class NgxOverflowRevealDirective implements OnInit, OnDestroy {
     if (panelRight > viewportWidth - padding && maxAvailableWidth > 0) {
       panel.style.maxWidth = `${Math.round(maxAvailableWidth)}px`;
     }
+  }
+
+  private getBoxShadow(): string {
+    const customShadow = this.ngxOverflowRevealBoxShadow();
+    if (customShadow !== undefined) {
+      return customShadow;
+    }
+    
+    return this.ngxOverflowRevealElevated()
+      ? '0 0 0 1px rgba(0, 0, 0, 0.05), 0 0 8px rgba(0, 0, 0, 0.1), 0 0 16px rgba(0, 0, 0, 0.05)'
+      : 'none';
   }
 }
